@@ -81,7 +81,6 @@ int main(int argc, char *argv[])
 	while (getline(cin, userinput))
 	{
 		nta_report(NTAREP_DEBUG, "INPUT: " + userinput);
-		// printf("NTA @> ");
 		try
 		{
 			stoi(userinput);
