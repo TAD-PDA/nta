@@ -10,7 +10,6 @@ void nta_keyserver_start()
 	{
 		nta_report(NTAREP_ERROR, "Refusing to start program with an existing " + string(NTAKEY_LOCK_FILE));
 		exit(1);
-		//raise(SIGTERM);
 	}
 	else
 	{
@@ -80,15 +79,6 @@ void nta_execute_keysig(string action, vector<int> keylist, unsigned int depth)
 	}
 
 	int value = depth > keylist.size() ? 0 : keylist[depth];
-
-	/* int i = 0;
-	printf("depth: %d\n", depth);
-	while (i < keylist.size())
-	{
-		printf("%d\n", keylist[i]);
-		i++;
-	}
-	printf("value: %d", value); */
 
 	nta_keyserver_emit(EV_KEY, keycode, value);
 	nta_keyserver_emit(EV_SYN, SYN_REPORT, 0);
