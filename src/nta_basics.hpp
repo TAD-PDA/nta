@@ -6,28 +6,32 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <string>
+#include <sstream>
+#include <iostream>
 #include <signal.h>
 #include <pwd.h>
 #include <sys/types.h>
 
 using namespace std;
 
-#define NTA_HELPTEXT "Usage: nta [OPTION]\n"                                         \
-					 "\n"                                                            \
-					 "Application options :\n"                                       \
-					 "   -h --help			Show this text\n"                               \
-					 "   -i FILE			Use this file as input\n"                         \
-					 "   -f FILE			Use keymap from FILE\n"                           \
-					 "   -t	--test-mode 	Print commands instead of executing them\n" \
-					 "\n"                                                            \
-					 "Reporting options :\n"                                         \
-					 "   --report-warn\n"                                            \
-					 "   --report-info\n"                                            \
-					 "   --report-expand\n"                                          \
-					 "   --report-error \n"                                          \
-					 "   --report-debug\n"                                           \
-					 "   --report-verbose\n"                                         \
-					 "   --report-noparse\n"                                         \
+#define NTA_HELPTEXT "Usage: nta [OPTION]\n"                                          \
+					 "\n"                                                             \
+					 "Application options :\n"                                        \
+					 "	    --log				Redirect stdout to a log file"                    \
+					 "   -h --help				Show this text\n"                               \
+					 "   -i 			FILE	Use FILE as input\n"                              \
+					 "   -f 			FILE	Use keymap from FILE\n"             \
+					 "   -t	--test-mode 		Print commands instead of executing them\n" \
+					 "\n"                                                             \
+					 "Reporting options :\n"                                          \
+					 "   --report-warn\n"                                             \
+					 "   --report-info\n"                                             \
+					 "   --report-expand\n"                                           \
+					 "   --report-error \n"                                           \
+					 "   --report-debug\n"                                            \
+					 "   --report-verbose\n"                                          \
+					 "   --report-noparse\n"                                          \
 					 "   --report-noexpand\n";
 
 #define NTAREP_WARN 0b1L
@@ -37,6 +41,13 @@ using namespace std;
 #define NTAREP_DEBUG 0b10000L
 #define NTAREP_PARSE 0b100000L
 
+#define COMMAND_QUIT string("quit")
+#define COMMAND_LIST string("list")
+#define COMMAND_REDIRECT string("@NTAREDIR@")
+
+#define REDIRECT_FIFO "/tmp/nta_redirect"
+#define LOG_FILE "./nta.log"
+
 #define NTAREP_DEFAULT (NTAREP_ERROR | NTAREP_PARSE)
 #define NTAREP_VERBOSE (NTAREP_WARN | NTAREP_ERROR | NTAREP_INFO | NTAREP_EXPAND | NTAREP_DEBUG | NTAREP_PARSE)
 
@@ -45,5 +56,7 @@ void nta_print_help();
 void nta_report_determine_levels(int argc, char *argv[], string &keymap_file);
 
 void nta_report(const long int type, const string report);
+
+int split_sring_to_int_vector(string s, vector<int> &v);
 
 #endif

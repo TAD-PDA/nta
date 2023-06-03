@@ -3,6 +3,11 @@
 long int nta_report_global_allowed_levels = NTAREP_DEFAULT;
 bool nta_global_noexecute = 0;
 
+void nta_load_logfile()
+{
+	freopen(LOG_FILE, "w", stdout);
+}
+
 void nta_print_help()
 {
 	const char *usagetext = NTA_HELPTEXT;
@@ -22,7 +27,11 @@ void nta_report_determine_levels(int argc, char *argv[], string &keymap_file)
 
 	for (int i = 1; i < argc; i++)
 	{
-		if (strcmp(argv[i], "--report-warn") == 0)
+		if (strcmp(argv[i], "--log") == 0)
+		{
+			nta_load_logfile();
+		}
+		else if (strcmp(argv[i], "--report-warn") == 0)
 		{
 			nta_report_global_allowed_levels |= NTAREP_WARN;
 		}
@@ -122,3 +131,73 @@ void nta_report(const long int type, const string report)
 		printf("%s\n", report.c_str());
 	}
 };
+
+void nta_report_source(const long int type, const string source, const string report)
+{
+	if (nta_report_global_allowed_levels & type)
+	{
+		switch (nta_report_global_allowed_levels & type)
+		{
+		case NTAREP_WARN:
+			printf("[WARN|%s] ", source);
+			break;
+		case NTAREP_ERROR:
+			printf("[ERROR|%s] ", source);
+			break;
+		case NTAREP_INFO:
+			printf("[INFO|%s] ", source);
+			break;
+		case NTAREP_EXPAND:
+			printf("[EXPAND|%s] ", source);
+			break;
+		case NTAREP_DEBUG:
+			printf("[DEBUG|%s] ", source);
+			break;
+		case NTAREP_PARSE:
+			printf("[PARSE|%s] ", source);
+			break;
+		default:
+			break;
+		}
+		printf("%s\n", report.c_str());
+	}
+};
+
+int split_sring_to_int_vector(string s, vector<int> &v)
+{
+	v.clear();
+	string temp = "";
+	for (unsigned int i = 0; i < s.length(); ++i)
+	{
+
+		if (s[i] == ' ')
+		{
+			try
+			{
+				v.push_back(stoi(temp));
+			}
+			catch (invalid_argument const &)
+			{
+				nta_report(NTAREP_WARN, "Input formatted incorrectly, aborting execution");
+				v.clear();
+				return 1;
+			}
+			temp = "";
+		}
+		else
+		{
+			temp.push_back(s[i]);
+		}
+	}
+	try
+	{
+		v.push_back(stoi(temp));
+	}
+	catch (invalid_argument const &)
+	{
+		nta_report(NTAREP_WARN, "Input formatted incorrectly, aborting execution");
+		v.clear();
+		return 1;
+	}
+	return 0;
+}
