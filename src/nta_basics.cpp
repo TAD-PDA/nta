@@ -3,6 +3,14 @@
 long int nta_report_global_allowed_levels = NTAREP_DEFAULT;
 bool nta_global_noexecute = 0;
 
+void print_timestamp()
+{
+	time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	char buffer[128];
+	std::strftime(buffer, 128 * sizeof(char), "%d.%m.%Y|%T", std::localtime(&time));
+	printf("[%s]", buffer);
+}
+
 int nta_open_file_for_redirect(string filename)
 {
 	fclose(fopen(filename.c_str(), "w"));
@@ -119,6 +127,7 @@ void nta_report_determine_levels(int argc, char *argv[], string &keymap_file)
 
 void nta_report(const long int type, const string report)
 {
+	print_timestamp();
 	if (nta_report_global_allowed_levels & type)
 	{
 		switch (nta_report_global_allowed_levels & type)
@@ -150,6 +159,7 @@ void nta_report(const long int type, const string report)
 
 void nta_report_source(const string source, const long int type, const string report)
 {
+	print_timestamp();
 	if (nta_report_global_allowed_levels & type)
 	{
 		switch (nta_report_global_allowed_levels & type)
