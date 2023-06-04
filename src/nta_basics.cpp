@@ -127,9 +127,10 @@ void nta_report_determine_levels(int argc, char *argv[], string &keymap_file)
 
 void nta_report(const long int type, const string report)
 {
-	print_timestamp();
+	
 	if (nta_report_global_allowed_levels & type)
 	{
+		print_timestamp();
 		switch (nta_report_global_allowed_levels & type)
 		{
 		case NTAREP_WARN:
@@ -159,9 +160,10 @@ void nta_report(const long int type, const string report)
 
 void nta_report_source(const string source, const long int type, const string report)
 {
-	print_timestamp();
+	
 	if (nta_report_global_allowed_levels & type)
 	{
+		print_timestamp();
 		switch (nta_report_global_allowed_levels & type)
 		{
 		case NTAREP_WARN:
