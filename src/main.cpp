@@ -74,8 +74,6 @@ void run_nta_from_masterkey(ntakey masterkey)
 		// Operation when input is being redirected to FIFO
 		else
 		{
-
-			nta_report(NTAREP_DEBUG, "REDIR: " + userinput);
 			// A line with the same toggle redirect command breaks out of
 			// this mode.
 			size_t redirpos = 0;
