@@ -49,6 +49,8 @@ void run_nta_from_masterkey(ntakey masterkey)
 
 			catch (invalid_argument const &)
 			{
+				int redirpos = 0;
+
 				if (userinput == COMMAND_LIST)
 				{
 					masterkey.list_recursively();
@@ -59,9 +61,9 @@ void run_nta_from_masterkey(ntakey masterkey)
 					nta_report(NTAREP_INFO, "Quit by command");
 					break;
 				}
-				else if (userinput == COMMAND_REDIRECT)
+				else if ((redirpos = userinput.find(COMMAND_REDIRECT)) != string::npos)
 				{
-					redirected = !redirected;
+					sscanf(userinput.c_str() + redirpos + sizeof(COMMAND_REDIRECT), " %d ", &redirected);
 				}
 				else
 				{
