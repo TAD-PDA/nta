@@ -8,7 +8,7 @@ void nta_keyserver_start()
 
 	if (access(NTAKEY_LOCK_FILE, F_OK) == 0)
 	{
-		nta_report(NTAREP_ERROR, "Refusing to start program with an existing " + string(NTAKEY_LOCK_FILE));
+		nta_report_source(NTA_KEYBOARD_MODULE_NAME, NTAREP_ERROR, "Refusing to start program with an existing " + string(NTAKEY_LOCK_FILE));
 		exit(1);
 	}
 	else
@@ -22,7 +22,7 @@ void nta_keyserver_start()
 
 	/*
 	 * The ioctls below will enable the device that is about to be
-	 * created, to pass key events, in this case the space key.
+	 * created, to pass key events.
 	 */
 	ioctl(ntakey_global_fd, UI_SET_EVBIT, EV_KEY);
 	ioctl(ntakey_global_fd, UI_SET_EVBIT, EV_REP);
@@ -37,8 +37,8 @@ void nta_keyserver_start()
 
 	memset(&usetup, 0, sizeof(usetup));
 	usetup.id.bustype = NTAKEY_BUS_TYPE;
-	usetup.id.vendor = NTAKEY_ID_VENDOR;   /* sample vendor */
-	usetup.id.product = NTAKEY_ID_PRODUCT; /* sample product */
+	usetup.id.vendor = NTAKEY_ID_VENDOR;
+	usetup.id.product = NTAKEY_ID_PRODUCT;
 	strcpy(usetup.name, NTAKEY_DEVICE_NAME);
 
 	ioctl(ntakey_global_fd, UI_DEV_SETUP, &usetup);
@@ -75,7 +75,7 @@ void nta_execute_keysig(string action, vector<int> keylist, unsigned int depth)
 	}
 	catch (invalid_argument const &)
 	{
-		nta_report(NTAREP_ERROR, "Unknown or otherwise incorrect key: " + action);
+		nta_report_source(NTA_KEYBOARD_MODULE_NAME, NTAREP_ERROR, "Unknown or otherwise incorrect key: " + action);
 	}
 
 	int value = depth > keylist.size() ? 0 : keylist[depth];
@@ -83,7 +83,7 @@ void nta_execute_keysig(string action, vector<int> keylist, unsigned int depth)
 	nta_keyserver_emit(EV_KEY, keycode, value);
 	nta_keyserver_emit(EV_SYN, SYN_REPORT, 0);
 
-	nta_report(NTAREP_DEBUG, "Button " + to_string(keycode) + ": " + to_string(value));
+	nta_report_source(NTA_KEYBOARD_MODULE_NAME, NTAREP_DEBUG, "Button " + to_string(keycode) + ": " + to_string(value));
 }
 
 void nta_parse_keysig(string &action_to_parse)
@@ -104,12 +104,12 @@ void nta_parse_keysig(string &action_to_parse)
 		if (regex_search(line, m, r))
 		{
 			keycode_pos = line.find(keycode);
-			nta_report(NTAREP_PARSE, keycode);
-			nta_report(NTAREP_PARSE, line);
+			nta_report_source(NTA_KEYBOARD_MODULE_NAME, NTAREP_PARSE, keycode);
+			nta_report_source(NTA_KEYBOARD_MODULE_NAME, NTAREP_PARSE, line);
 			keycode_number = line.substr(keycode_pos + keycode.length() + 1);
 			size_t start = keycode_number.find_first_not_of(WHITESPACE);
 			keycode_number = keycode_number.substr(start);
-			nta_report(NTAREP_PARSE, keycode_number);
+			nta_report_source(NTA_KEYBOARD_MODULE_NAME, NTAREP_PARSE, keycode_number);
 			action_to_parse.clear();
 			action_to_parse = keycode_number;
 			return;

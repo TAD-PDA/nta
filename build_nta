@@ -1,3 +1,0 @@
-mkdir bin
-clang++ ./src/nta_main.cpp -o ./bin/nta
-./bin/nta $@

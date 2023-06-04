@@ -15,7 +15,7 @@ MAINFILE := $(SRC)/main.cpp
 TARGET := $(BIN)/nta
 BUILD := build
 
-ARGS := --report-debug -f ./test/tad_nta.cfg -i ./test/test_input
+ARGS := --report-debug -f ./test/tad_nta.cfg -i ./test/test_input --log ./run.log
 
 # Library search directories and flags
 EXT_LIB :=

@@ -3,9 +3,16 @@
 long int nta_report_global_allowed_levels = NTAREP_DEFAULT;
 bool nta_global_noexecute = 0;
 
-void nta_load_logfile()
+int nta_open_file_for_redirect(string filename)
 {
-	freopen(LOG_FILE, "w", stdout);
+	fclose(fopen(filename.c_str(), "w"));
+	int fd = open(filename.c_str(), O_WRONLY | O_NONBLOCK);
+	return fd;
+};
+
+void nta_load_logfile(string filename)
+{
+	freopen(filename.c_str(), "w", stdout);
 }
 
 void nta_print_help()
@@ -27,11 +34,7 @@ void nta_report_determine_levels(int argc, char *argv[], string &keymap_file)
 
 	for (int i = 1; i < argc; i++)
 	{
-		if (strcmp(argv[i], "--log") == 0)
-		{
-			nta_load_logfile();
-		}
-		else if (strcmp(argv[i], "--report-warn") == 0)
+		if (strcmp(argv[i], "--report-warn") == 0)
 		{
 			nta_report_global_allowed_levels |= NTAREP_WARN;
 		}
@@ -54,6 +57,19 @@ void nta_report_determine_levels(int argc, char *argv[], string &keymap_file)
 		else if ((strcmp(argv[i], "-t") == 0) || (strcmp(argv[i], "--test-mode") == 0))
 		{
 			nta_global_noexecute = 1;
+		}
+		else if ((strcmp(argv[i], "-l") == 0) || (strcmp(argv[i], "--log") == 0))
+		{
+			if (i + 1 < argc)
+			{
+				nta_load_logfile(argv[i + 1]);
+			}
+			else
+			{
+				printf("No file passed.\n");
+				exit(66);
+			}
+			i++;
 		}
 		else if (strcmp(argv[i], "-f") == 0)
 		{
@@ -132,29 +148,29 @@ void nta_report(const long int type, const string report)
 	}
 };
 
-void nta_report_source(const long int type, const string source, const string report)
+void nta_report_source(const string source, const long int type, const string report)
 {
 	if (nta_report_global_allowed_levels & type)
 	{
 		switch (nta_report_global_allowed_levels & type)
 		{
 		case NTAREP_WARN:
-			printf("[WARN|%s] ", source);
+			printf("[WARN|%s] ", source.c_str());
 			break;
 		case NTAREP_ERROR:
-			printf("[ERROR|%s] ", source);
+			printf("[ERROR|%s] ", source.c_str());
 			break;
 		case NTAREP_INFO:
-			printf("[INFO|%s] ", source);
+			printf("[INFO|%s] ", source.c_str());
 			break;
 		case NTAREP_EXPAND:
-			printf("[EXPAND|%s] ", source);
+			printf("[EXPAND|%s] ", source.c_str());
 			break;
 		case NTAREP_DEBUG:
-			printf("[DEBUG|%s] ", source);
+			printf("[DEBUG|%s] ", source.c_str());
 			break;
 		case NTAREP_PARSE:
-			printf("[PARSE|%s] ", source);
+			printf("[PARSE|%s] ", source.c_str());
 			break;
 		default:
 			break;

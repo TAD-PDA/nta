@@ -17,9 +17,11 @@
 #define NTAKEY_SCRIPT_FILE "~/nta/keyboard.sh"
 #define NTAKEY_LOCK_FILE "/tmp/nta_keyboard.lock"
 #define NTAKEY_DEVICE_NAME "NTA Virtual Keyboard"
-#define NTAKEY_BUS_TYPE BUS_USB
+#define NTAKEY_BUS_TYPE BUS_VIRTUAL
 #define NTAKEY_ID_VENDOR 1
 #define NTAKEY_ID_PRODUCT 1
+
+#define NTA_KEYBOARD_MODULE_NAME "KEY"
 
 extern int ntakey_global_fd;
 

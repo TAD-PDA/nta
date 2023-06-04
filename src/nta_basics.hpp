@@ -10,7 +10,9 @@
 #include <sstream>
 #include <iostream>
 #include <signal.h>
+#include <fcntl.h>
 #include <pwd.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 
 using namespace std;
@@ -18,11 +20,11 @@ using namespace std;
 #define NTA_HELPTEXT "Usage: nta [OPTION]\n"                                          \
 					 "\n"                                                             \
 					 "Application options :\n"                                        \
-					 "	    --log				Redirect stdout to a log file"                    \
-					 "   -h --help				Show this text\n"                               \
+					 "	 -l --log		FILE	Redirect stdout to FILE"                       \
 					 "   -i 			FILE	Use FILE as input\n"                              \
-					 "   -f 			FILE	Use keymap from FILE\n"             \
+					 "   -f 			FILE	Use keymap from FILE\n"                           \
 					 "   -t	--test-mode 		Print commands instead of executing them\n" \
+					 "   -h --help				Show this text\n"                               \
 					 "\n"                                                             \
 					 "Reporting options :\n"                                          \
 					 "   --report-warn\n"                                             \
@@ -45,7 +47,7 @@ using namespace std;
 #define COMMAND_LIST string("list")
 #define COMMAND_REDIRECT string("@NTAREDIR@")
 
-#define REDIRECT_FIFO "/tmp/nta_redirect"
+#define REDIRECT_FILE "/tmp/nta_redirect"
 #define LOG_FILE "./nta.log"
 
 #define NTAREP_DEFAULT (NTAREP_ERROR | NTAREP_PARSE)
@@ -56,6 +58,10 @@ void nta_print_help();
 void nta_report_determine_levels(int argc, char *argv[], string &keymap_file);
 
 void nta_report(const long int type, const string report);
+
+void nta_report_source(const string source, const long int type, const string report);
+
+int nta_open_file_for_redirect(string filename);
 
 int split_sring_to_int_vector(string s, vector<int> &v);
 

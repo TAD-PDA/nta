@@ -11,51 +11,89 @@ using namespace std;
 #define DEFAULT_MAP_FILENAME "./test/ntakey.cfg"
 
 int current_layer = 0;
+int redirect_fifo_fd;
+
+void run_nta_from_masterkey(ntakey masterkey)
+{
+
+	string userinput = "";
+	bool redirected = false;
+
+	while (getline(cin, userinput))
+	{
+		// Normal operation
+		if (!redirected)
+		{
+			nta_report(NTAREP_DEBUG, "INPUT: " + userinput);
+			try
+			{
+
+				stoi(userinput);
+				vector<int> userinput_split;
+
+				if (!split_sring_to_int_vector(userinput, userinput_split))
+				{
+					userinput_split.insert(userinput_split.begin(), current_layer);
+					userinput.clear();
+					int temp_layer = current_layer;
+
+					if (!userinput_split.empty())
+						masterkey.perform_recursively(userinput_split, userinput_split, temp_layer, 0);
+
+					if (masterkey.has_child(temp_layer))
+						current_layer = temp_layer;
+					else
+						nta_report(NTAREP_ERROR, "Layer switching failed: layer " + to_string(temp_layer) + " does not exist.");
+				}
+			}
+
+			catch (invalid_argument const &)
+			{
+				if (userinput == COMMAND_LIST)
+				{
+					masterkey.list_recursively();
+					printf("\n");
+				}
+				else if (userinput == COMMAND_QUIT)
+				{
+					nta_report(NTAREP_INFO, "Quit by command");
+					break;
+				}
+				else if (userinput == COMMAND_REDIRECT)
+				{
+					redirected = !redirected;
+				}
+				else
+				{
+					nta_report(NTAREP_INFO, "Unknown input: " + userinput);
+				}
+			}
+		}
+		// Operation when input is being redirected to FIFO
+		else
+		{
+
+			nta_report(NTAREP_DEBUG, "REDIR: " + userinput);
+			// A line with the same toggle redirect command breaks out of
+			// this mode.
+			if (userinput == COMMAND_REDIRECT)
+			{
+				redirected = !redirected;
+				continue;
+			}
+
+			// Just echo input to the redirect
+			write(redirect_fifo_fd, (userinput + '\n').c_str(), (userinput + '\n').length());
+		}
+	}
+}
 
 void term(int signum)
 {
-	nta_report(NTAREP_INFO, "Quit by signal "+ to_string(signum));
+	nta_report(NTAREP_INFO, "Quit by signal " + to_string(signum));
 	nta_keyserver_end();
+	close(redirect_fifo_fd);
 	exit(signum);
-}
-
-int SplitString(string s, vector<int> &v)
-{
-	v.clear();
-	string temp = "";
-	for (unsigned int i = 0; i < s.length(); ++i)
-	{
-
-		if (s[i] == ' ')
-		{
-			try
-			{
-				v.push_back(stoi(temp));
-			}
-			catch (invalid_argument const &)
-			{
-				nta_report(1, "Input formatted incorrectly, aborting execution");
-				v.clear();
-				return 1;
-			}
-			temp = "";
-		}
-		else
-		{
-			temp.push_back(s[i]);
-		}
-	}
-	try
-	{
-		v.push_back(stoi(temp));
-	}
-	catch (invalid_argument const &)
-	{
-		nta_report(1, "Input formatted incorrectly, aborting execution");
-		v.clear();
-		return 1;
-	}
-	return 0;
 }
 
 int main(int argc, char *argv[])
@@ -70,48 +108,14 @@ int main(int argc, char *argv[])
 
 	nta_report_determine_levels(argc, argv, nta_keymap_file);
 
-	vector<int> ex;
-	vector<int> alpha_int = {};
-	vector<string> alpha_str = {};
 	ntakey masterkey(0);
-	string userinput = "";
 
 	nta_read_config_to_key(nta_keymap_file, masterkey);
 
-	while (getline(cin, userinput))
-	{
-		nta_report(NTAREP_DEBUG, "INPUT: " + userinput);
-		try
-		{
-			stoi(userinput);
-			if (!SplitString(userinput, ex))
-			{
-				ex.insert(ex.begin(), current_layer);
-				userinput.clear();
-				int temp_layer = current_layer;
+	redirect_fifo_fd = nta_open_file_for_redirect(REDIRECT_FILE);
 
-				if (!ex.empty())
-					masterkey.perform_recursively(ex, ex, temp_layer, 0);
+	run_nta_from_masterkey(masterkey);
 
-				if (masterkey.has_child(temp_layer))
-					current_layer = temp_layer;
-				else
-					nta_report(NTAREP_ERROR, "Layer switching failed: layer " + to_string(temp_layer) + " does not exist.");
-			}
-		}
-		catch (invalid_argument const &)
-		{
-			if (userinput == "list")
-			{
-				masterkey.list_recursively();
-				printf("\n");
-			}
-			else if (userinput == "quit" || userinput == "exit" || userinput == "abort")
-			{
-				nta_report(NTAREP_INFO, "Quit by command");
-				break;
-			}
-		}
-	}
 	nta_keyserver_end();
+	close(redirect_fifo_fd);
 }
