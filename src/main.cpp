@@ -17,7 +17,7 @@ void run_nta_from_masterkey(ntakey masterkey)
 {
 
 	string userinput = "";
-	bool redirected = false;
+	int redirected = 0;
 
 	while (getline(cin, userinput))
 	{
