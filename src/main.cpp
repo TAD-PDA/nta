@@ -49,7 +49,7 @@ void run_nta_from_masterkey(ntakey masterkey)
 
 			catch (invalid_argument const &)
 			{
-				int redirpos = 0;
+				size_t redirpos = 0;
 
 				if (userinput == COMMAND_LIST)
 				{
