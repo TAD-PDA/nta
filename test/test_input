@@ -1,6 +1,6 @@
 list
-@NTAREDIR@
+@NTAREDIR@ 1 
 1 2 2
 1 3 4
 Test data to be redirected to REDIRECT_FIFO
-@NTAREDIR@
+@NTAREDIR@ 0 

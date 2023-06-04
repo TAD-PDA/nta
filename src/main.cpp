@@ -63,7 +63,7 @@ void run_nta_from_masterkey(ntakey masterkey)
 				}
 				else if ((redirpos = userinput.find(COMMAND_REDIRECT)) != string::npos)
 				{
-					sscanf(userinput.c_str() + redirpos + sizeof(COMMAND_REDIRECT), " %d ", &redirected);
+					sscanf(userinput.c_str() + redirpos + COMMAND_REDIRECT.length(), " %d ", &redirected);
 				}
 				else
 				{
@@ -78,10 +78,10 @@ void run_nta_from_masterkey(ntakey masterkey)
 			nta_report(NTAREP_DEBUG, "REDIR: " + userinput);
 			// A line with the same toggle redirect command breaks out of
 			// this mode.
-			if (userinput == COMMAND_REDIRECT)
+			size_t redirpos = 0;
+			if ((redirpos = userinput.find(COMMAND_REDIRECT)) != string::npos)
 			{
-				redirected = !redirected;
-				continue;
+				sscanf(userinput.c_str() + redirpos + COMMAND_REDIRECT.length(), " %d ", &redirected);
 			}
 
 			// Just echo input to the redirect
